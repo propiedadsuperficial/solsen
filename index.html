@@ -1174,27 +1174,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // 1. CONTROL DE ACCESO (Bloqueo)
-  onAuthStateChanged(auth, (user) => {
-  
-    // ❌ No logueado → enviar a login
-    if (!user) {
-      window.location.href = "login.html";
-      return;
-    }
-  
-    // ❌ No es correo PUCOBRE → bloquear
-    if (!user.email.endsWith("@pucobre.cl")) {
-      alert("Acceso solo para usuarios PUCOBRE");
-      signOut(auth);
-      return;
-    }
-  
-    // ✅ Acceso OK
-    console.log("Acceso OK:", user.email);
-  
-  });
-
+ 
 
   // 2. LOG DE PRODUCTIVIDAD (Dashboard)
   window.registrarUso = async (nombreProyecto) => {
