@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plano de Concesión Minera</title>
+
+<style>
+:root{
+  --paper:#f6f4ee;
+  --ink:#1c2b22;
+  --line:#2c3e34;
+  --accent:#9c5b2c;
+  --accent-soft:#e8d9c5;
+  --panel:#ffffff;
+  --panel-border:#cfc7b3;
+  --muted:#6b6456;
+  --mono: "Courier New", Courier, monospace;
+  --serif: "Georgia", "Times New Roman", serif;
+  --sans: "Helvetica Neue", Arial, sans-serif;
+}
+
+*{ box-sizing:border-box; }
+
+html,body{
+  margin:0;
+  padding:0;
+  background:#e9e5da;
+  color:var(--ink);
+  font-family:var(--sans);
+}
+
+/* ---------- Layout general ---------- */
+.app{
+  display:flex;
+  min-height:100vh;
+}
+
+.sidebar{
+  width:380px;
+  min-width:380px;
+  background:var(--panel);
+  border-right:1px solid var(--panel-border);
+  padding:24px 22px 40px;
+  overflow-y:auto;
+  height:100vh;
+  position:sticky;
+  top:0;
+}
+
+.stage{
+  flex:1;
+  padding:32px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:18px;
+}
+
+/* ---------- Sidebar ---------- */
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:4px;
+}
+.brand .logo{
+  width:42px;
+  height:42px;
+  border-radius:4px;
+  display:block;
+  flex-shrink:0;
+}
+.brand .brand-text{
+  display:flex;
+  flex-direction:column;
+}
+.brand h1{
+  font-family:var(--serif);
+  font-size:18px;
+  font-weight:700;
+  margin:0;
+  letter-spacing:.2px;
+  line-height:1.2;
+}
+.brand span.tag{
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+}
+
+.subtitle{
+  font-size:11.5px;
+  color:var(--muted);
+  margin:2px 0 22px;
+  line-height:1.5;
+}
+
+fieldset{
+  border:none;
+  margin:0 0 20px;
+  padding:0;
+}
+legend{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  color:var(--accent);
+  font-weight:700;
+  margin-bottom:10px;
+  padding-bottom:6px;
+  border-bottom:1px solid var(--accent-soft);
+  width:100%;
+}
+
+.field{
+  margin-bottom:12px;
+}
+.field label{
+  display:block;
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+.field input, .field select{
+  width:100%;
+  padding:7px 9px;
+  font-size:13px;
+  border:1px solid var(--panel-border);
+  border-radius:3px;
+  background:#fdfcfa;
+  color:var(--ink);
+  font-family:var(--sans);
+}
+.field input:focus, .field select:focus{
+  outline:none;
+  border-color:var(--accent);
+  background:#fff;
+}
+.row2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.row3{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+}
+
+.readout{
+  background:#faf7f0;
+  border:1px solid var(--accent-soft);
+  border-radius:4px;
+  padding:10px 12px;
+  margin-top:4px;
+}
+.readout .rline{
+  display:flex;
+  justify-content:space-between;
+  font-size:11.5px;
+  padding:3px 0;
+  border-bottom:1px dashed #e1d6c2;
+}
+.readout .rline:last-child{ border-bottom:none; }
+.readout .rline span:first-child{ color:var(--muted); }
+.readout .rline span:last-child{
+  font-family:var(--mono);
+  font-weight:700;
+}
+
+.actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:22px;
+}
+button{
+  font-family:var(--sans);
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  padding:11px 14px;
+  border-radius:3px;
+  border:1px solid var(--line);
+  cursor:pointer;
+  transition:transform .08s ease, opacity .15s ease;
+}
+button:active{ transform:translateY(1px); }
+.btn-primary{
+  background:var(--line);
+  color:#fff;
+}
+.btn-primary:hover{ background:#1f2f26; }
+.btn-secondary{
+  background:transparent;
+  color:var(--line);
+}
+.btn-secondary:hover{ background:#f1efe7; }
+.btn-export{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+.btn-export:hover{ opacity:.92; }
+
+.hint{
+  font-size:10.5px;
+  color:var(--muted);
+  margin-top:18px;
+  line-height:1.5;
+  border-top:1px solid #eee;
+  padding-top:12px;
+}
+
+/* ---------- Stage / Sheet ---------- */
+.stage-toolbar{
+  width:100%;
+  max-width:900px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.stage-toolbar h2{
+  font-size:13px;
+  color:var(--muted);
+  font-weight:600;
+  margin:0;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+}
+.zoom-controls{
+  display:flex;
+  gap:6px;
+}
+.zoom-controls button{
+  padding:5px 10px;
+  font-size:11px;
+  background:#fff;
+  color:var(--line);
+  border:1px solid var(--panel-border);
+  text-transform:none;
+  font-weight:600;
+}
+
+#sheet-wrapper{
+  background:#d9d4c5;
+  padding:24px;
+  border-radius:6px;
+  box-shadow:inset 0 0 0 1px #c7c1ae;
+  overflow:auto;
+  max-width:100%;
+}
+
+#sheet{
+  width:780px;
+  background:#ffffff;
+  box-shadow:0 6px 22px rgba(0,0,0,.18);
+  font-family:var(--sans);
+  color:var(--ink);
+  transform-origin:top center;
+}
+
+/* ----- Tabla de coordenadas ----- */
+.coord-azimut-wrap{
+  display:flex;
+  margin:14px 14px 0;
+  border:1.4px solid var(--ink);
+}
+table.coords{
+  border-collapse:collapse;
+  font-size:10.5px;
+  flex:1.3;
+}
+table.coords th, table.coords td{
+  border:1px solid var(--ink);
+  padding:4px 7px;
+  text-align:center;
+}
+table.coords thead th{
+  background:#eee9dd;
+  font-weight:700;
+  text-transform:uppercase;
+  font-size:9px;
+  letter-spacing:.4px;
+}
+table.coords td.label{
+  font-weight:700;
+  background:#f7f4ec;
+}
+table.coords td.num{
+  font-family:var(--mono);
+}
+
+.relacion{
+  flex:1;
+  border-left:1.4px solid var(--ink);
+  padding:6px 10px;
+  font-size:10px;
+}
+.relacion h4{
+  margin:0 0 6px;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  text-align:center;
+  border-bottom:1px solid var(--ink);
+  padding-bottom:4px;
+}
+.relacion .rl{
+  display:flex;
+  justify-content:space-between;
+  padding:2px 0;
+}
+.relacion .rl .v{ font-family:var(--mono); font-weight:700; }
+.relacion .sub{
+  font-size:8.5px;
+  color:var(--muted);
+  margin:0 0 4px;
+}
+
+/* ----- Plano gráfico ----- */
+.plano-box{
+  margin:0 14px;
+  border:1.4px solid var(--ink);
+  border-top:none;
+  position:relative;
+  height:430px;
+  background:
+    linear-gradient(0deg, transparent 24px, rgba(0,0,0,0.025) 25px),
+    #fff;
+}
+.plano-box svg{ width:100%; height:100%; display:block; }
+
+.scale-bar{
+  margin:0 14px;
+  border:1.4px solid var(--ink);
+  border-top:none;
+  padding:6px 14px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* ----- Carátula final (idéntica al plano oficial) ----- */
+.caratula{
+  margin:0 14px 14px;
+  border:1.4px solid var(--ink);
+  border-top:none;
+}
+.caratula-title{
+  text-align:center;
+  padding:10px 10px 12px;
+  border-bottom:1.4px solid var(--ink);
+}
+.caratula-title .kicker{
+  font-size:10px;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+}
+.caratula-title .big-name{
+  font-family:var(--serif);
+  font-size:26px;
+  font-weight:700;
+  margin-top:4px;
+  text-transform:uppercase;
+}
+
+.caratula table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:10.5px;
+}
+.caratula table td{
+  border-right:1.4px solid var(--ink);
+  border-bottom:1px solid var(--ink);
+  vertical-align:top;
+  padding:6px 10px;
+}
+.caratula table tr:last-child td{ border-bottom:none; }
+.caratula table td:last-child{ border-right:none; }
+
+/* Columna ubicación */
+td.ub-col{
+  width:145px;
+  text-align:center;
+}
+td.ub-col .ub-label{ text-align:left; font-size:10.5px; text-transform:uppercase; }
+td.ub-col .ub-value{ text-align:center; margin:0 0 10px; text-transform:uppercase; }
+td.ub-col .ub-lugar{ margin-top:6px; }
+.north-rose{ margin-top:14px; }
+
+/* Columna concesionario (encabezado propio) */
+td.conc-col{
+}
+td.conc-col .conc-kicker{ font-size:9px; text-transform:uppercase; }
+td.conc-col .conc-name{
+  font-family:var(--serif);
+  font-size:15.5px;
+  font-weight:700;
+  text-align:center;
+  margin:4px 0 2px;
+  text-transform:uppercase;
+}
+
+/* Filas internas de la grilla derecha */
+.kv-row{ margin-bottom:2px; }
+.kv-row .k{ font-size:9.5px; text-transform:uppercase; }
+.kv-row .v{ font-weight:700; margin-left:4px; text-transform:uppercase; }
+.kv-center{ text-align:center; margin-top:2px; text-transform:uppercase; }
+
+td.empty-label{ font-size:10px; text-transform:uppercase; }
+
+td.signature-cell{
+  text-align:center;
+  vertical-align:middle;
+}
+td.signature-cell .sig-name{
+  font-family:var(--serif);
+  font-size:14px;
+  font-weight:700;
+  text-transform:uppercase;
+}
+td.signature-cell .sig-role{
+  font-size:9.5px;
+  margin-top:3px;
+  text-transform:uppercase;
+}
+
+.placeholder-note{
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+  padding:14px;
+}
+
+/* ---------- Print ---------- */
+@media print{
+  body *{ visibility:hidden; }
+  #sheet, #sheet *{ visibility:visible; }
+  #sheet{
+    position:absolute;
+    left:0; top:0;
+    box-shadow:none;
+    width:100%;
+  }
+  #sheet-wrapper{ padding:0; background:#fff; box-shadow:none; }
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img class="logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAB4AHgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9UgOKMUDpS0AJijFR3NzFZwPPPIsUKDLO5wFHqTWZ/wAJhof/AEFrP/v8tQ5xjux2bNfFGKyP+Ev0T/oLWf8A3+Wj/hL9E/6C1n/3+Wl7WH8y+8LPsa+KMVkf8Jfon/QWs/8Av8tH/CX6J/0FrP8A7/LR7WH8y+8LPsa+KMVkf8Jfon/QWs/+/wAtH/CYaH/0FrP/AL/LR7WH8y+8LPsa+KMVkf8ACYaH/wBBaz/7/LR/wmGh/wDQWs/+/wAtHtIfzL7ws+xr4oxQrBlBByDyDS1oIQjiig9KKAAdKWkHSloAwfHX/In6t/1wavAsV7746/5E/Vv+uDV4FXgZj/Ej6HXR2Z2Wiat4PS0todR0eXz1QLLcgkqW7tgNnH4V6FD8P/DNxCksWmxPG6hlYO2CD0PWvC696+H8jS+DdKZjkiLb+AJA/lVYKUasnCcVouwqqcdUzkvFMXhLwtqKWc2gNO7RiQNHIcYJIxy3tWZBrngZ2xLoM8I9QS38npvxf/5GeD/r1X/0Jq4euetVdOrKMYqy8kXGN4ptnrul+F/BXiaNjYIC4GWRJXV1+qk1jeJ/hM9lA9zpEr3KqMtbS4L4/wBk9/pXBWF/Ppd5Fd2shinibcrD+R9jX0Ro+opq+lWl7GMLPGsmPTI5FdVBUsXFxlFJrsZy5qbumfOGPakI4rr/AIn6Kmk+JWkiUJFdp520dA2cN+vP41yJ6V5NSDpzcH0OhPmVz6Wtf+PaH/cH8qlqK1/49of9wfyqWvsFsecIelFB6UUwAdKWkHSloAwfHX/In6t/1wavAq998df8ifq3/XBq8CrwMx/iR9Dro7MK94+Hf/Il6X/1zP8A6Ea8Hr3j4d/8iXpf/XM/+hGll38R+n+QVvhPP/i//wAjPB/16r/6E1cPXcfF/wD5GeD/AK9V/wDQmrh648T/ABp+ppT+FBXu3w5JPgvTM/3GA+m9q8JwSQACSeAB3NfRHhrTTpHh+ws24eKFVb/exk/rmu3Lov2kpeRnW2R578Z2X7dpS/xeXIfwytecnpXUfEfWk1nxPN5TB4bZRArDoSD8x/MkfhXLnpXFiZKdaTRpBWij6Wtf+PaH/cH8qlqK1/49of8AcH8qlr6tbHAIelFB6UUwAdKWkHSloAwfHX/In6t/1wavAq998df8ifq3/XBq8CrwMx/iR9Dro7MK94+Hf/Il6X/1zP8A6Ea8Hr3j4d/8iXpf/XM/+hGll38R+n+QVvhPPvjAwHieDJA/0Vf/AEJq4+0sbm/kEdrbS3DnoIkLfyr1Px942uPDmtRW0VlaXCtCJN86ksCSRjr04rmpfizrLJthhs7Yf7EZP8zWdeNL20nKXXsODlyqyNvwP8OJNPuE1PWQsbRfPFbEg7T/AHnPTj0p/jj4lRRQy6fo8vmzNlZLtT8qDuFPc+/auA1bxPquuAre30s0Z/5ZA7U/75HFZdS8SoQ9nRVl36jUG3eQUHpRQelcBsfS1r/x7Q/7g/lUtRWv/HtD/uD+VS19otjzBD0ooPSimADpS0g6UtAGD46/5E/Vv+uDV4FXvvjr/kT9W/64NXgVeBmP8SPoddHZhXvHw7/5EvS/+uZ/9CNeD17x8PBjwXpf/XM/+hGll38R+n+QVvhPP/i//wAjPB/16r/6E1cPXc/F8EeJrc9jar/6E1cNXHiv40vU0p/CgooormNAoPSig9KAPpa1/wCPaH/cH8qlqK1/49of9wfyqWvtFseYIelFB6UUwAdKWkHSloAwfHfHg/Vv+uDV4DvX+8Pzr3b4meNbL4c+Add8TajayXtjpdq1zNbwhS8ijqBuIGfrXlnhn9pDQ9U13w3p+ueAdd8IweJHWLSdS1S0hNtcyMu5E3Ru20sCMZHOa87E4V4iSknaxtCpyK1ifSPhvrOs29vcRiCK1nUOsryZ+U98DmvZ9I02PSNMtbKIkpBGIwT3wOteeeCfjnpHjD4WeIPGtnpd5aadoj30UlpIEEr/AGXO/bg4528ZI98Vj6t+1DoNh4P8GapaaPq2r634utxc6T4csI1kvJF27mLfNtVVB5YnH1wcbUMNChrHcmU3Pc6/4h+B7nxPJbXVk8YuIUMbRyHAZc5GD6jn868113wfqnhu3Se/ijiid9ilZA2Tgnt9K6fwR+0ZoviK98QaZ4h0vUPAuvaDZ/2lfabriqGW07zo6FldB0JHQkVyY/a50e4s7PXNV8B+JtP8A3UyxweK720jNqAx2rK8e4ukZJ4cr3rKtgoVW5LRsqNRx0Mnev8AeH50b1/vD867Dxr8ddP8M/EN/B2keANW8YammnR6ozaNFbsggdiob53XuB/30KzL39qPwhafDm88U/8ACK6n9psdZj0G90KW0ijvbe7c4CMC23uOQe9cX9my/m/A09suxhb1/vD86QuuPvD867Dw18e9K1LxnY+F/EHgDXPBmq6lDNNpw1i0h8q78pd0iI8bsNwUZwf8M4Phj9phvGuiW2saF8GPFeq6VclhDd28FoUfaxVsZlHRgR+FH9my/m/APbLsfQ1r/wAe0P8AuD+VS0yJt0SNtKZAO09R7U+vcRyiHpRQelFMAHSlpB0paAPKP2rQW/Zx+IQCl86TL8qjJPSuF+HXwG8Q+L9M+GuteMfHk2taLoUNnqum6Db6ZFaJHMsK+V5kgJaTYDjkDPPqa+kCAwwRkehoAwMDgUAfDXgz4q6D8KPgd8T/AId+J3u9P8ayX2rxW2kGzlaW7+0bhC0WFIZW3DnPTn0rX0S1vPgB4p+DfjLxjplzB4di8Fp4dv7tIGl/sm63eYDKqglQwO0nHY+lfZbW8TyrI0SNIn3XKgkfQ050WRSrKGUjBBGQaAPmT4ieO7f9p/wZ8RfC3w+0ebU7ddCKReKyhiguLjeHFlFvUM2Qpyc7QTz1BrmPG/7QHhnx1+zk/wAPdGsL+68f6lpcWhr4TNhKtxbXG1Y2LgrtVEILbs4wB+H2DFEkMYSNFjQdFUYA/CkEEazGURqJWGC4UbiPTNAHw54ot9I8BfH/AE7T/F/jbWvBUVj4E06wbVdCd1kuJ432mMssb5U7Wbp1Uc1yGqNcX3wD8S2unC8ufD5+INi2leJbq0aO91Pe+Xnl3DMjK2MOQM4AI4xX6KNGjHJVSfUigopABAIHbFAHyze+FNa8DftJ+CIfE3iK88exalpOprpl7qsaxPpU6RBpDGsQWMmRPlyy7uODXkf7O/ir4feHfh14fbxD8W/F/hjVbWeSabQbK4nSzQCdmVdiwsNrrgsN3O49K/QMqGIJAJHTNN8mP/nmv5UAEEyXEMcsZ3RuoZT6gjIp9FFACHpRQelFAADxRmiigAzRmiigAzRmiigAzRmiigAzRmiigAzRmiigAzRmiigAJ4ooooA//9k=" alt="Pucobre">
+      <div class="brand-text">
+        <h1>Plano de Concesión</h1>
+        <span class="tag">Pucobre &middot; Gerencia de Proyectos</span>
+      </div>
+    </div>
+    <div class="subtitle">
+      Generador de plano de mensura para solicitud de sentencia constitutiva.<br>
+      Complete los datos y presione <b>Generar plano</b>.
+    </div>
+
+    <fieldset>
+      <legend>Identificación</legend>
+      <div class="field">
+        <label for="nombre">Nombre de la concesión</label>
+        <input id="nombre" placeholder="Ej: Antonia I" value="Antonia I">
+      </div>
+      <div class="row3">
+        <div class="field">
+          <label for="fojas">Fojas</label>
+          <input id="fojas" value="2453">
+        </div>
+        <div class="field">
+          <label for="numero">N°</label>
+          <input id="numero" value="12-45">
+        </div>
+        <div class="field">
+          <label for="anio">Año</label>
+          <input id="anio" value="2013">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Ubicación administrativa</legend>
+      <div class="field">
+        <label for="region">Región</label>
+        <input id="region" value="Atacama">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="provincia">Provincia</label>
+          <input id="provincia" value="Copiapó">
+        </div>
+        <div class="field">
+          <label for="comuna">Comuna</label>
+          <input id="comuna" value="Copiapó">
+        </div>
+      </div>
+      <div class="field">
+        <label for="lugar">Lugar</label>
+        <input id="lugar" value="Quebrada de la laguna sin nombre">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="hojaigm">Hoja I.G.M.</label>
+          <input id="hojaigm" value="Llano de Campos">
+        </div>
+        <div class="field">
+          <label for="seccion">Sección</label>
+          <input id="seccion" value="C-18">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Concesionario y expediente</legend>
+      <div class="field">
+        <label for="concesionario">Concesionario</label>
+        <input id="concesionario" value="Sociedad Punta del Cobre S.A.">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="fechapedimento">Fecha pedimento</label>
+          <input id="fechapedimento" value="26 de agosto de 2011">
+        </div>
+        <div class="field">
+          <label for="fecharesolucion">Fecha resolución</label>
+          <input id="fecharesolucion" value="30 de agosto de 2011">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="autosrol">Autos rol</label>
+          <input id="autosrol" value="227-2010">
+        </div>
+        <div class="field">
+          <label for="juzgado">Juzgado</label>
+          <input id="juzgado" value="Primer Juzgado de Letras de Copiapó">
+        </div>
+      </div>
+      <div class="field">
+        <label for="fechainscripcion">Fecha inscripción</label>
+        <input id="fechainscripcion" value="05 de septiembre de 2011">
+      </div>
+      <div class="field">
+        <label for="registroconservador">Registro / Conservador</label>
+        <input id="registroconservador" value="Registro de Descubrimientos del Conservador de Minas de Copiapó">
+      </div>
+      <div class="field">
+        <label for="mensurador">Perito mensurador</label>
+        <input id="mensurador" value="Arnaldo Tiffi Pascal">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Geometría — Punto de medición</legend>
+      <div class="row2">
+        <div class="field">
+          <label for="este">Este P.M. (m)</label>
+          <input id="este" value="399000">
+        </div>
+        <div class="field">
+          <label for="norte">Norte P.M. (m)</label>
+          <input id="norte" value="6987800">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="ancho">Ancho (m)</label>
+          <input id="ancho" value="1000">
+        </div>
+        <div class="field">
+          <label for="alto">Alto (m)</label>
+          <input id="alto" value="4000">
+        </div>
+      </div>
+
+      <div class="readout" id="calc-readout">
+        <div class="rline"><span>Distancia P.M.–V1</span><span id="out-distancia">—</span></div>
+        <div class="rline"><span>Azimut P.M.–V1</span><span id="out-azimut">—</span></div>
+        <div class="rline"><span>Rumbo P.M.–V1</span><span id="out-rumbo">—</span></div>
+        <div class="rline"><span>Área</span><span id="out-area">—</span></div>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="generarPlano()">Generar plano</button>
+      <button class="btn-secondary" onclick="limpiarPlano()">Limpiar plano</button>
+      <button class="btn-export" onclick="exportarPDF()">Exportar PDF</button>
+    </div>
+
+    <div class="hint">
+      Las coordenadas están en sistema UTM (Datum Sudamericano La Canoa 1956, Elipsoide Internacional 1924, Huso 19). Los vértices V1–V4 se generan como un rectángulo de Ancho × Alto, centrado en el lado norte respecto del Punto de Medición.
+    </div>
+  </aside>
+
+  <!-- ============ STAGE ============ -->
+  <main class="stage">
+    <div class="stage-toolbar">
+      <h2>Vista previa del plano</h2>
+      <div class="zoom-controls">
+        <button onclick="zoom(-0.1)">−</button>
+        <button onclick="zoom(0,true)">100%</button>
+        <button onclick="zoom(0.1)">+</button>
+      </div>
+    </div>
+
+    <div id="sheet-wrapper">
+      <div id="sheet">
+
+        <!-- Tabla coordenadas + relación -->
+        <div class="coord-azimut-wrap">
+          <table class="coords">
+            <thead>
+              <tr><th rowspan="2">Vértice</th><th colspan="2">Coordenadas UTM</th></tr>
+              <tr><th>Norte (m)</th><th>Este (m)</th></tr>
+            </thead>
+            <tbody id="coords-body">
+              <tr><td class="label">P.M.</td><td class="num">—</td><td class="num">—</td></tr>
+              <tr><td class="label">V1</td><td class="num">—</td><td class="num">—</td></tr>
+              <tr><td class="label">V2</td><td class="num">—</td><td class="num">—</td></tr>
+              <tr><td class="label">V3</td><td class="num">—</td><td class="num">—</td></tr>
+              <tr><td class="label">V4</td><td class="num">—</td><td class="num">—</td></tr>
+            </tbody>
+          </table>
+          <div class="relacion">
+            <h4>RELACIÓN V1 – P.M.</h4>
+            <div class="rl"><span>DISTANCIA U.T.M.</span><span class="v" id="rel-distancia">—</span></div>
+            <div class="rl"><span>RUMBO U.T.M.</span><span class="v" id="rel-rumbo">—</span></div>
+            <p class="sub">(GRADOS CENTESIMALES)</p>
+            <div class="rl"><span>AZIMUT U.T.M.</span><span class="v" id="rel-azimut">—</span></div>
+            <p class="sub">(GRADOS CENTESIMALES)</p>
+          </div>
+        </div>
+
+        <!-- Plano gráfico SVG -->
+        <div class="plano-box" id="plano-box">
+          <svg id="canvas" viewBox="0 0 760 430" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+
+        <!-- Escala -->
+        <div class="scale-bar">
+          <svg id="scale-svg" width="260" height="34" viewBox="0 0 260 34"></svg>
+        </div>
+
+        <!-- Carátula final (idéntica al plano oficial) -->
+        <div class="caratula">
+
+          <div class="caratula-title">
+            <div class="kicker">Plano de la concesión de exploración</div>
+            <div class="big-name" id="ph-nombre">Antonia I</div>
+          </div>
+
+          <table>
+            <tr>
+              <td class="ub-col" rowspan="3">
+                <div class="ub-label">Ubicación</div>
+                <div class="ub-label" style="margin-top:8px;">Región:</div>
+                <div class="ub-value" id="ph-region">—</div>
+                <div class="ub-label">Provincia:</div>
+                <div class="ub-value" id="ph-provincia">—</div>
+                <div class="ub-label">Comuna:</div>
+                <div class="ub-value" id="ph-comuna">—</div>
+                <div class="ub-value ub-lugar" id="ph-lugar">—</div>
+                <svg class="north-rose" width="46" height="46" viewBox="0 0 46 46">
+                  <circle cx="23" cy="23" r="20" fill="none" stroke="#1c2b22" stroke-width="1.2"/>
+                  <polygon points="23,5 27,23 23,19 19,23" fill="#1c2b22"/>
+                  <text x="23" y="14" font-size="7" text-anchor="middle" font-weight="700">N</text>
+                  <text x="23" y="40" font-size="6" text-anchor="middle">U.T.M.</text>
+                </svg>
+              </td>
+              <td class="conc-col" colspan="2">
+                <div class="conc-kicker">Concesionario</div>
+                <div class="conc-name" id="ph-concesionario">—</div>
+
+                <div class="kv-row"><span class="k">Fecha pedimento</span><span class="v" id="ph-fpedimento">—</span></div>
+                <div class="kv-row"><span class="k">Fecha resolución</span><span class="v" id="ph-fresolucion">—</span></div>
+                <div class="kv-row"><span class="k">Expediente rol</span><span class="v" id="ph-rol">—</span></div>
+                <div class="kv-row kv-center" id="ph-juzgado">—</div>
+              </td>
+              <td style="width:255px; font-size:8.3px; white-space:nowrap;">
+                <div class="kv-row"><span class="k">Datum provisorio</span> <span class="v">Sudamericano La Canoa 1956</span></div>
+                <div class="kv-row" style="margin-top:6px;"><span class="k">Elipsoide de referencia</span> <span class="v">Internacional 1924 - Huso 19</span></div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="conc-col" colspan="2">
+                <div class="kv-row"><span class="k">Fecha inscripción</span><span class="v" id="ph-finscripcion">—</span></div>
+                <div class="kv-row"><span class="k">Fojas</span><span class="v" id="ph-fojas">—</span>
+                  &nbsp;&nbsp;<span class="k">N°</span><span class="v" id="ph-numero">—</span>
+                  &nbsp;&nbsp;<span class="k">Año</span><span class="v" id="ph-anio">—</span></div>
+                <div class="kv-row kv-center" id="ph-registro">—</div>
+              </td>
+              <td class="empty-label">Confección</td>
+            </tr>
+
+            <tr>
+              <td style="width:130px;">
+                <div class="kv-row"><span class="k">Superficie</span></div>
+                <div class="kv-row" style="text-align:center;"><span class="v" id="ph-superficie">—</span></div>
+              </td>
+              <td style="width:150px;">
+                <div class="kv-row"><span class="k">Hoja I.G.M.</span></div>
+                <div class="kv-row" style="text-align:center;"><span class="v" id="ph-hojaigm">—</span></div>
+                <div class="kv-row" style="margin-top:4px;"><span class="k">Sección</span> <span class="v" id="ph-seccion">—</span></div>
+              </td>
+              <td class="signature-cell">
+                <div class="sig-name" id="ph-mensurador2">—</div>
+                <div class="sig-role">Perito mensurador</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* =========================================================
+   UTILIDADES GEOMÉTRICAS
+   Sistema UTM: Este = X, Norte = Y
+   Azimut en grados centesimales (gradianes), medido desde
+   el Norte, sentido horario (igual convención que el plano
+   de referencia del Servicio Nacional de Geología y Minería).
+   ========================================================= */
+
+function fmtNum(n, dec){
+  return n.toLocaleString('es-CL', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+}
+
+function distancia(a, b){
+  return Math.hypot(b.e - a.e, b.n - a.n);
+}
+
+// Azimut UTM en grados centesimales (gon), desde 'a' hacia 'b'
+function azimutGon(a, b){
+  const dE = b.e - a.e;
+  const dN = b.n - a.n;
+  let angDeg = Math.atan2(dE, dN) * (180/Math.PI);
+  if(angDeg < 0) angDeg += 360;
+  return angDeg * (400/360);
+}
+
+// Convierte azimut (gon) a notación de rumbo tipo "S - 15,5958 g - E"
+function azimutARumbo(azGon){
+  let cuadrante, base, ref1, ref2;
+  if(azGon <= 100){
+    ref1 = "N"; ref2 = "E"; base = azGon;
+  } else if(azGon <= 200){
+    ref1 = "S"; ref2 = "E"; base = 200 - azGon;
+  } else if(azGon <= 300){
+    ref1 = "S"; ref2 = "O"; base = azGon - 200;
+  } else {
+    ref1 = "N"; ref2 = "O"; base = 400 - azGon;
+  }
+  return ref1 + " - " + fmtNum(base,4) + " g - " + ref2;
+}
+
+function formatGon(v){
+  return fmtNum(v,4) + " g";
+}
+
+/* =========================================================
+   CÁLCULO PRINCIPAL
+   ========================================================= */
+
+function calcularVertices(){
+  const este  = parseFloat(document.getElementById('este').value);
+  const norte = parseFloat(document.getElementById('norte').value);
+  const ancho = parseFloat(document.getElementById('ancho').value);
+  const alto  = parseFloat(document.getElementById('alto').value);
+
+  if([este,norte,ancho,alto].some(v => isNaN(v) || v === null)){
+    return null;
+  }
+
+  const PM = {e: este, n: norte};
+
+  // Punto medio del lado norte (V1-V2), ubicado a Alto/2 al norte de P.M.
+  const midNorte = {e: este, n: norte + alto/2};
+
+  const V1 = {e: midNorte.e - ancho/2, n: midNorte.n};
+  const V2 = {e: midNorte.e + ancho/2, n: midNorte.n};
+  const V3 = {e: V2.e,                 n: V2.n - alto};
+  const V4 = {e: V1.e,                 n: V1.n - alto};
+
+  // La "Relación V1-P.M." del plano oficial se expresa como azimut/rumbo
+  // medidos DESDE V1 HACIA el P.M. (no al revés).
+  const distPM_V1 = distancia(V1, PM);
+  const azPM_V1    = azimutGon(V1, PM);
+  const rumboPM_V1 = azimutARumbo(azPM_V1);
+
+  const area = ancho * alto; // m²
+  const areaHa = area / 10000;
+
+  return {
+    PM, V1, V2, V3, V4,
+    distPM_V1, azPM_V1, rumboPM_V1,
+    ancho, alto, area, areaHa
+  };
+}
+
+/* =========================================================
+   RENDER SVG DEL PLANO
+   ========================================================= */
+
+function dibujarPlano(geo){
+  const svg = document.getElementById('canvas');
+  const W = 760, H = 430;
+  const margin = 78;
+
+  // Bounding box en coordenadas reales (incluye PM)
+  const pts = [geo.PM, geo.V1, geo.V2, geo.V3, geo.V4];
+  const minE = Math.min(...pts.map(p=>p.e));
+  const maxE = Math.max(...pts.map(p=>p.e));
+  const minN = Math.min(...pts.map(p=>p.n));
+  const maxN = Math.max(...pts.map(p=>p.n));
+
+  const spanE = (maxE - minE) || 1;
+  const spanN = (maxN - minN) || 1;
+
+  const availW = W - margin*2;
+  const availH = H - margin*2;
+
+  const scale = Math.min(availW/spanE, availH/spanN);
+
+  // proyectar: este -> x (derecha), norte -> y invertido (arriba)
+  function proj(p){
+    const x = margin + (p.e - minE) * scale + (availW - spanE*scale)/2;
+    const y = margin + (maxN - p.n) * scale + (availH - spanN*scale)/2;
+    return {x, y};
+  }
+
+  const pPM = proj(geo.PM);
+  const pV1 = proj(geo.V1);
+  const pV2 = proj(geo.V2);
+  const pV3 = proj(geo.V3);
+  const pV4 = proj(geo.V4);
+
+  const ink = "#1c2b22";
+  const accent = "#9c5b2c";
+
+  function line(p1,p2,opts={}){
+    const {dash="", w=1.1, color=ink, arrow=false, id=""} = opts;
+    const markerAttr = arrow ? `marker-end="url(#arrowhead)"` : "";
+    return `<line ${id?('id="'+id+'"'):''} x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${color}" stroke-width="${w}" ${dash?('stroke-dasharray="'+dash+'"'):''} ${markerAttr}/>`;
+  }
+
+  function label(x,y,text,opts={}){
+    const {size=10, anchor="middle", weight="400", rotate=0, color=ink} = opts;
+    const transform = rotate ? `transform="rotate(${rotate} ${x} ${y})"` : "";
+    return `<text x="${x}" y="${y}" font-size="${size}" text-anchor="${anchor}" font-weight="${weight}" fill="${color}" font-family="Helvetica Neue, Arial, sans-serif" ${transform}>${text}</text>`;
+  }
+
+  function pointDot(p, r=3.2, color=ink){
+    return `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${color}"/>`;
+  }
+
+  // perimetro
+  let svgContent = `
+    <defs>
+      <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="${ink}"/>
+      </marker>
+    </defs>
+  `;
+
+  // Rectángulo principal de la concesión
+  svgContent += `<polygon points="${pV1.x},${pV1.y} ${pV2.x},${pV2.y} ${pV3.x},${pV3.y} ${pV4.x},${pV4.y}"
+                   fill="rgba(156,91,44,0.06)" stroke="${ink}" stroke-width="1.6"/>`;
+
+  // Línea PM -> V1
+  svgContent += line(pPM, pV1, {dash:"4,3", w:1, color:accent});
+
+  // Vertices dots
+  svgContent += pointDot(pPM, 3.4, accent);
+  svgContent += pointDot(pV1);
+  svgContent += pointDot(pV2);
+  svgContent += pointDot(pV3);
+  svgContent += pointDot(pV4);
+
+  // Etiquetas de vértices
+  svgContent += label(pV1.x-10, pV1.y-8, "V1", {weight:"700", anchor:"end"});
+  svgContent += label(pV2.x+10, pV2.y-8, "V2", {weight:"700", anchor:"start"});
+  svgContent += label(pV3.x+10, pV3.y+14, "V3", {weight:"700", anchor:"start"});
+  svgContent += label(pV4.x-10, pV4.y+14, "V4", {weight:"700", anchor:"end"});
+  svgContent += label(pPM.x, pPM.y+16, "P.M.", {weight:"700", size:9, color:accent});
+
+  // Flechas de borde (afuera del rectángulo) con azimut + distancia
+  const off = 20;
+
+  // V1-V2 (arriba)
+  svgContent += line({x:pV1.x, y:pV1.y-off}, {x:pV2.x, y:pV2.y-off}, {arrow:true});
+  svgContent += label((pV1.x+pV2.x)/2, pV1.y-off-16, `AZIMUT V1–V2 ${formatGon(100)}`, {size:8.3});
+  svgContent += label((pV1.x+pV2.x)/2, pV1.y-off-5, `DIST. ${fmtNum(geo.ancho,2)} m`, {size:8.3});
+
+  // V3-V4 (abajo)
+  svgContent += line({x:pV3.x, y:pV3.y+off}, {x:pV4.x, y:pV4.y+off}, {arrow:true});
+  svgContent += label((pV3.x+pV4.x)/2, pV3.y+off+13, `AZIMUT V3–V4 ${formatGon(300)}`, {size:8.3});
+  svgContent += label((pV3.x+pV4.x)/2, pV3.y+off+24, `DIST. ${fmtNum(geo.ancho,2)} m`, {size:8.3});
+
+  // V2-V3 (derecha)
+  svgContent += line({x:pV2.x+off, y:pV2.y}, {x:pV3.x+off, y:pV3.y}, {arrow:true});
+  {
+    const midY = (pV2.y+pV3.y)/2;
+    svgContent += label(pV2.x+off+11, midY, `AZIMUT V2–V3  ${formatGon(200)}`, {size:7.4, rotate:90, anchor:"middle"});
+    svgContent += label(pV2.x+off+23, midY, `DIST. ${fmtNum(geo.alto,2)} m`, {size:7.4, rotate:90, anchor:"middle"});
+  }
+
+  // V4-V1 (izquierda)
+  svgContent += line({x:pV4.x-off, y:pV4.y}, {x:pV1.x-off, y:pV1.y}, {arrow:true});
+  {
+    const midY = (pV4.y+pV1.y)/2;
+    svgContent += label(pV4.x-off-11, midY, `AZIMUT V4–V1  ${formatGon(0)}`, {size:7.4, rotate:-90, anchor:"middle"});
+    svgContent += label(pV4.x-off-23, midY, `DIST. ${fmtNum(geo.alto,2)} m`, {size:7.4, rotate:-90, anchor:"middle"});
+  }
+
+  // Etiqueta diagonal PM-V1 (desplazada perpendicularmente a la línea para no pisarla)
+  const midPMV1 = {x:(pPM.x+pV1.x)/2, y:(pPM.y+pV1.y)/2};
+  const dx = pV1.x - pPM.x, dy = pV1.y - pPM.y;
+  const segLen = Math.hypot(dx,dy) || 1;
+  const ang = Math.atan2(dy,dx) * 180/Math.PI;
+  // vector perpendicular unitario
+  const perpX = -dy/segLen, perpY = dx/segLen;
+  const offDiag = 9;
+  const lblX = midPMV1.x + perpX*offDiag;
+  const lblY = midPMV1.y + perpY*offDiag;
+  svgContent += label(lblX, lblY, `DIST. ${fmtNum(geo.distPM_V1,2)} m`, {size:7.2, rotate:ang, color:accent, anchor:"middle"});
+  svgContent += label(lblX + perpX*11, lblY + perpY*11, `AZ. ${formatGon(geo.azPM_V1)}`, {size:7.2, rotate:ang, color:accent, anchor:"middle"});
+
+  svg.innerHTML = svgContent;
+
+  // ---- Escala gráfica ----
+  const scaleSvg = document.getElementById('scale-svg');
+  const barUnits = geo.ancho >= 2000 ? 1000 : 500;
+  const pxPerUnit = scale; // unidades reales -> px en el canvas principal
+  const segPx = barUnits * pxPerUnit;
+  let sx = 10, sy = 18;
+  let scaleContent = `<line x1="${sx}" y1="${sy}" x2="${sx+segPx*2}" y2="${sy}" stroke="${ink}" stroke-width="1.2"/>`;
+  for(let i=0;i<=2;i++){
+    const x = sx + i*segPx;
+    scaleContent += `<line x1="${x}" y1="${sy-5}" x2="${x}" y2="${sy+5}" stroke="${ink}" stroke-width="1.2"/>`;
+    scaleContent += `<text x="${x}" y="${sy+16}" font-size="8.5" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif">${i*barUnits}</text>`;
+  }
+  scaleContent += `<text x="${sx+segPx*2+14}" y="${sy+3}" font-size="8.5" font-family="Helvetica Neue, Arial, sans-serif">metros</text>`;
+  scaleSvg.setAttribute('width', (sx+segPx*2+60));
+  scaleSvg.setAttribute('viewBox', `0 0 ${sx+segPx*2+60} 34`);
+  scaleSvg.innerHTML = scaleContent;
+}
+
+/* =========================================================
+   RENDER DE TEXTOS / FICHA / TABLA
+   ========================================================= */
+
+function v(id){
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : "";
+}
+
+function actualizarFicha(){
+  document.getElementById('ph-nombre').textContent = v('nombre') || "—";
+  document.getElementById('ph-region').textContent = v('region') || "—";
+  document.getElementById('ph-provincia').textContent = v('provincia') || "—";
+  document.getElementById('ph-comuna').textContent = v('comuna') || "—";
+  document.getElementById('ph-lugar').textContent = v('lugar') || "—";
+  document.getElementById('ph-concesionario').textContent = v('concesionario') || "—";
+  document.getElementById('ph-fpedimento').textContent = v('fechapedimento') || "—";
+  document.getElementById('ph-fresolucion').textContent = v('fecharesolucion') || "—";
+  document.getElementById('ph-rol').textContent = v('autosrol') || "—";
+  document.getElementById('ph-juzgado').textContent = v('juzgado') || "—";
+  document.getElementById('ph-finscripcion').textContent = v('fechainscripcion') || "—";
+  document.getElementById('ph-mensurador2').textContent = v('mensurador') || "—";
+  document.getElementById('ph-fojas').textContent = v('fojas') || "—";
+  document.getElementById('ph-numero').textContent = v('numero') || "—";
+  document.getElementById('ph-anio').textContent = v('anio') || "—";
+  document.getElementById('ph-registro').textContent = v('registroconservador') || "—";
+  document.getElementById('ph-hojaigm').textContent = v('hojaigm') || "—";
+  document.getElementById('ph-seccion').textContent = v('seccion') || "—";
+}
+
+function actualizarTablaCoordenadas(geo){
+  const filas = [
+    ["P.M.", geo.PM],
+    ["V1", geo.V1],
+    ["V2", geo.V2],
+    ["V3", geo.V3],
+    ["V4", geo.V4],
+  ];
+  const body = document.getElementById('coords-body');
+  body.innerHTML = filas.map(([label, p]) => `
+    <tr>
+      <td class="label">${label}</td>
+      <td class="num">${fmtNum(p.n,2)}</td>
+      <td class="num">${fmtNum(p.e,2)}</td>
+    </tr>
+  `).join("");
+
+  document.getElementById('ph-superficie').textContent = fmtNum(geo.areaHa,0) + " Ha";
+}
+
+function actualizarRelacion(geo){
+  document.getElementById('rel-distancia').textContent = fmtNum(geo.distPM_V1,2) + " m";
+  document.getElementById('rel-rumbo').textContent = geo.rumboPM_V1;
+  document.getElementById('rel-azimut').textContent = formatGon(geo.azPM_V1);
+}
+
+function actualizarPanelLateral(geo){
+  document.getElementById('out-distancia').textContent = fmtNum(geo.distPM_V1,2) + " m";
+  document.getElementById('out-azimut').textContent = formatGon(geo.azPM_V1);
+  document.getElementById('out-rumbo').textContent = geo.rumboPM_V1;
+  document.getElementById('out-area').textContent = fmtNum(geo.areaHa,2) + " Ha (" + fmtNum(geo.area,0) + " m²)";
+}
+
+/* =========================================================
+   ACCIONES PRINCIPALES
+   ========================================================= */
+
+function generarPlano(){
+  const geo = calcularVertices();
+  if(!geo){
+    alert("Revise Este, Norte, Ancho y Alto: deben ser valores numéricos.");
+    return;
+  }
+  actualizarFicha();
+  actualizarTablaCoordenadas(geo);
+  actualizarRelacion(geo);
+  actualizarPanelLateral(geo);
+  dibujarPlano(geo);
+}
+
+function limpiarPlano(){
+  document.getElementById('coords-body').innerHTML = `
+    <tr><td class="label">P.M.</td><td class="num">—</td><td class="num">—</td></tr>
+    <tr><td class="label">V1</td><td class="num">—</td><td class="num">—</td></tr>
+    <tr><td class="label">V2</td><td class="num">—</td><td class="num">—</td></tr>
+    <tr><td class="label">V3</td><td class="num">—</td><td class="num">—</td></tr>
+    <tr><td class="label">V4</td><td class="num">—</td><td class="num">—</td></tr>
+  `;
+  ['rel-distancia','rel-rumbo','rel-azimut'].forEach(id => document.getElementById(id).textContent = "—");
+  ['out-distancia','out-azimut','out-rumbo','out-area'].forEach(id => document.getElementById(id).textContent = "—");
+  document.getElementById('canvas').innerHTML = "";
+  document.getElementById('scale-svg').innerHTML = "";
+}
+
+function nombreArchivoPDF(){
+  const nombre = (v('nombre') || "plano").trim();
+  const slug = nombre
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar tildes
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const aa = String(d.getFullYear()).slice(-2);
+  const mm = pad(d.getMonth()+1);
+  const dd = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const mi = pad(d.getMinutes());
+
+  return `${slug}_${aa}-${mm}-${dd}-${hh}-${mi}.pdf`;
+}
+
+async function exportarPDF(){
+  generarPlano();
+
+  const btns = document.querySelectorAll('.actions button');
+  btns.forEach(b => b.disabled = true);
+  const exportBtn = document.querySelector('.btn-export');
+  const originalLabel = exportBtn ? exportBtn.textContent : null;
+  if(exportBtn) exportBtn.textContent = "Generando PDF…";
+
+  // Neutralizar el zoom de la vista previa mientras se captura
+  const sheet = document.getElementById('sheet');
+  const prevTransform = sheet.style.transform;
+  sheet.style.transform = 'none';
+
+  try{
+    const canvas = await html2canvas(sheet, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+
+    // Carta (Letter) en orientación vertical, ajustando la imagen a lo ancho
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let renderWidth = imgWidth;
+    let renderHeight = imgHeight;
+    if(imgHeight > pageHeight){
+      renderHeight = pageHeight;
+      renderWidth = (canvas.width * renderHeight) / canvas.height;
+    }
+    const offsetX = (pageWidth - renderWidth) / 2;
+    const offsetY = (pageHeight - renderHeight) / 2;
+
+    pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderWidth, renderHeight);
+    pdf.save(nombreArchivoPDF());
+  } catch(err){
+    console.error(err);
+    alert("No se pudo generar el PDF. Intente nuevamente.");
+  } finally {
+    sheet.style.transform = prevTransform;
+    btns.forEach(b => b.disabled = false);
+    if(exportBtn) exportBtn.textContent = originalLabel;
+  }
+}
+
+/* =========================================================
+   ZOOM DE VISTA PREVIA
+   ========================================================= */
+let currentZoom = 1;
+function zoom(delta, reset){
+  if(reset){ currentZoom = 1; }
+  else { currentZoom = Math.min(1.6, Math.max(0.5, currentZoom + delta)); }
+  document.getElementById('sheet').style.transform = `scale(${currentZoom})`;
+}
+
+/* =========================================================
+   INICIALIZACIÓN
+   ========================================================= */
+window.addEventListener('DOMContentLoaded', () => {
+  generarPlano();
+});
+</script>
+
+</body>
+</html>
