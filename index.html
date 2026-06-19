@@ -1045,6 +1045,10 @@ function generarPlano(){
   actualizarRelacion(geo);
   actualizarPanelLateral(geo);
   dibujarPlano(geo);
+
+  // ¡AQUÍ ESTÁ LA INTEGRACIÓN DEL DASHBOARD!
+  if (window.registrarUso) {
+      window.registrarUso(document.getElementById('nombre').value);
 }
 
 function limpiarPlano(){
@@ -1150,5 +1154,50 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyASX0uvY2zAtKyAPmqlgJhZiNf2syDTARo",
+    authDomain: "sol-men.firebaseapp.com",
+    projectId: "sol-men",
+    storageBucket: "sol-men.firebasestorage.app",
+    messagingSenderId: "1034527439439",
+    appId: "1:1034527439439:web:f4e6b026ae2f9be01c483a",
+    measurementId: "G-38KVRE32W5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // 1. CONTROL DE ACCESO (Bloqueo)
+  onAuthStateChanged(auth, (user) => {
+    if (user && user.email.endsWith("@pucobre.cl")) {
+      console.log("Usuario autorizado:", user.email);
+    } else if (user) {
+      alert("Acceso denegado: Solo correos @pucobre.cl");
+      signOut(auth);
+    } else {
+      // Aquí redirigirías al login de Firebase UI
+      window.location.href = "login.html"; // O muestra tu div de login
+    }
+  });
+
+  // 2. LOG DE PRODUCTIVIDAD (Dashboard)
+  window.registrarUso = async (nombreProyecto) => {
+    try {
+      await addDoc(collection(db, "productividad_logs"), {
+        usuario: auth.currentUser.email,
+        proyecto: nombreProyecto,
+        fecha: serverTimestamp(),
+        accion: "generar_plano"
+      });
+    } catch (e) { console.error("Error al registrar:", e); }
+  };
+</script>
+  
 </body>
 </html>
