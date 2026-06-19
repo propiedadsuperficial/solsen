@@ -1176,16 +1176,25 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 1. CONTROL DE ACCESO (Bloqueo)
   onAuthStateChanged(auth, (user) => {
-    if (user && user.email.endsWith("@pucobre.cl")) {
-      console.log("Usuario autorizado:", user.email);
-    } else if (user) {
-      alert("Acceso denegado: Solo correos @pucobre.cl");
-      signOut(auth);
-    } else {
-      // Aquí redirigirías al login de Firebase UI
-      window.location.href = "login.html"; // O muestra tu div de login
+  
+    // ❌ No logueado → enviar a login
+    if (!user) {
+      window.location.href = "login.html";
+      return;
     }
+  
+    // ❌ No es correo PUCOBRE → bloquear
+    if (!user.email.endsWith("@pucobre.cl")) {
+      alert("Acceso solo para usuarios PUCOBRE");
+      signOut(auth);
+      return;
+    }
+  
+    // ✅ Acceso OK
+    console.log("Acceso OK:", user.email);
+  
   });
+
 
   // 2. LOG DE PRODUCTIVIDAD (Dashboard)
   window.registrarUso = async (nombreProyecto) => {
