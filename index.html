@@ -1124,24 +1124,39 @@ async function exportarPDF(){
 
     pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderWidth, renderHeight);
     
-    // ✅ capturar PDF
+// ✅ capturar PDF
     const blob = pdf.output("blob");
     const nombre = nombreArchivoPDF();
     
     // ✅ enviar TODO a backend
     const formData = new FormData();
-    formData.append("file", blob, nombre);
-    formData.append("rol", document.getElementById("autosrol").value);
-    formData.append("nombre", document.getElementById("nombre").value);
+    // Es vital pasar el blob y el 'nombre' para que el Worker lo reconozca como File
+    formData.append("file", blob, nombre); 
+    formData.append("rol", document.getElementById("autosrol").value || "sin_rol");
+    formData.append("nombre_concesion", document.getElementById("nombre").value);
     
-
-    await fetch("https://floral-dawn-28ec.propiedadsuperficial.workers.dev", {
-      method: "POST",
-      body: formData
-    });
-
+    // Lo envolvemos en su propio try/catch para que si falla el servidor, 
+    // la descarga local de abajo se ejecute de todas formas.
+    try {
+      // Reemplaza esto con la URL real de tu Worker
+      const WORKER_URL = "https://tu-worker.tusubdominio.workers.dev"; 
+      
+      const response = await fetch(WORKER_URL, {
+        method: "POST",
+        body: formData // NUNCA pongas headers de Content-Type aquí, el navegador lo hace solo
+      });
+      
+      if (response.ok) {
+        console.log("✅ PDF guardado exitosamente en Cloudflare R2");
+      } else {
+        const errorText = await response.text();
+        console.error("⚠️ Error al guardar en la nube:", errorText);
+      }
+    } catch (uploadError) {
+      console.error("❌ Error de red al intentar conectar con el Worker:", uploadError);
+    }
     
-    // ✅ mantener descarga local
+    // ✅ mantener descarga local (se ejecuta siempre, falle o no la nube)
     pdf.save(nombre);
 
 
