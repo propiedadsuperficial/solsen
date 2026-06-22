@@ -1120,8 +1120,34 @@ async function exportarPDF(){
     const offsetX = (pageWidth - renderWidth) / 2;
     const offsetY = (pageHeight - renderHeight) / 2;
 
+    
+
     pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderWidth, renderHeight);
-    pdf.save(nombreArchivoPDF());
+    
+    // ✅ capturar PDF
+    const blob = pdf.output("blob");
+    const nombre = nombreArchivoPDF();
+    
+    // ✅ enviar TODO a backend
+    const formData = new FormData();
+    formData.append("file", blob, nombre);
+    formData.append("rol", document.getElementById("autosrol").value);
+    formData.append("nombre", document.getElementById("nombre").value);
+    
+    await fetch("https://TU_ENDPOINT", {
+      method: "POST",
+      body: formData
+    });
+    
+    // ✅ mantener descarga local
+    pdf.save(nombre);
+
+
+
+
+
+
+    
   } catch(err){
     console.error(err);
     alert("No se pudo generar el PDF. Intente nuevamente.");
