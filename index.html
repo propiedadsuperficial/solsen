@@ -1134,10 +1134,12 @@ async function exportarPDF(){
     formData.append("rol", document.getElementById("autosrol").value);
     formData.append("nombre", document.getElementById("nombre").value);
     
-    await fetch("https://TU_ENDPOINT", {
+
+    await fetch("https://floral-dawn-28ec.propiedadsuperficial.workers.dev", {
       method: "POST",
       body: formData
     });
+
     
     // ✅ mantener descarga local
     pdf.save(nombre);
