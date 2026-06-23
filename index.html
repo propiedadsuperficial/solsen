@@ -1100,29 +1100,30 @@ async function exportarPDF(){
       useCORS: true
     });
 
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
+  // 1. Cambiamos a JPEG y le damos un 75% de calidad (0.75)
+  const imgData = canvas.toDataURL('image/jpeg', 0.75); 
+  const { jsPDF } = window.jspdf;
 
-    // Carta (Letter) en orientación vertical, ajustando la imagen a lo ancho
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+  // Carta (Letter) en orientación vertical, ajustando la imagen a lo ancho
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
 
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    let renderWidth = imgWidth;
-    let renderHeight = imgHeight;
-    if(imgHeight > pageHeight){
-      renderHeight = pageHeight;
-      renderWidth = (canvas.width * renderHeight) / canvas.height;
-    }
-    const offsetX = (pageWidth - renderWidth) / 2;
-    const offsetY = (pageHeight - renderHeight) / 2;
+  let renderWidth = imgWidth;
+  let renderHeight = imgHeight;
+  if(imgHeight > pageHeight){
+    renderHeight = pageHeight;
+    renderWidth = (canvas.width * renderHeight) / canvas.height;
+  }
+  const offsetX = (pageWidth - renderWidth) / 2;
+  const offsetY = (pageHeight - renderHeight) / 2;
 
-    
 
-    pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderWidth, renderHeight);
+
+  pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderWidth, renderHeight);
     
 // ✅ capturar PDF
     const blob = pdf.output("blob");
