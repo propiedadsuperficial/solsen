@@ -1237,7 +1237,7 @@ async function exportarPDF(){
   const imgData = canvas.toDataURL('image/jpeg', 0.75); 
   const { jsPDF } = window.jspdf;
 
-  // Carta (Letter) en orientación vertical, ajustando la imagen a lo ancho
+  // Oficio Chileno en orientación vertical, ajustando la imagen a lo ancho
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: [8.5,13] });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
