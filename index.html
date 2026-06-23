@@ -272,26 +272,20 @@ button:active{ transform:translateY(1px); }
 }
 
 #sheet{
-  width:850px;
-  height:1300px; /* clave */
+  width:780px;
   background:#ffffff;
   box-shadow:0 6px 22px rgba(0,0,0,.18);
+  font-family:var(--sans);
+  color:var(--ink);
   transform-origin:top center;
-  display:flex;
-  flex-direction:column;
 }
-
 
 /* ----- Tabla de coordenadas ----- */
 .coord-azimut-wrap{
-
   display:flex;
   margin:14px 14px 0;
   border:1.4px solid var(--ink);
-
-  flex:0 0 auto; /* 🔥 agrega esto */
 }
-
 table.coords{
   border-collapse:collapse;
   font-size:10.5px;
@@ -346,24 +340,18 @@ table.coords td.num{
 
 /* ----- Plano gráfico ----- */
 .plano-box{
-
   margin:0 14px;
   border:1.4px solid var(--ink);
   border-top:none;
   position:relative;
-
-  flex:1;            /* 🔥 clave */
-  min-height:600px;  /* 🔥 base mínima */
-
+  height:430px;
   background:
     linear-gradient(0deg, transparent 24px, rgba(0,0,0,0.025) 25px),
     #fff;
 }
-
 .plano-box svg{ width:100%; height:100%; display:block; }
 
 .scale-bar{
-
   margin:0 14px;
   border:1.4px solid var(--ink);
   border-top:none;
@@ -371,21 +359,14 @@ table.coords td.num{
   display:flex;
   align-items:center;
   justify-content:center;
-
-  flex:0 0 auto; /* 🔥 agrega */
 }
-
 
 /* ----- Carátula final (idéntica al plano oficial) ----- */
 .caratula{
-
   margin:0 14px 14px;
   border:1.4px solid var(--ink);
   border-top:none;
-
-  flex:0 0 auto; /* 🔥 agrega */
 }
-
 .caratula-title{
   text-align:center;
   padding:10px 10px 12px;
@@ -781,7 +762,7 @@ td.signature-cell .sig-role{
 
         <!-- Plano gráfico SVG -->
         <div class="plano-box" id="plano-box">
-          <svg id="canvas" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet"></svg>
+          <svg id="canvas" viewBox="0 0 760 430" preserveAspectRatio="xMidYMid meet"></svg>
         </div>
 
         <!-- Escala -->
@@ -955,109 +936,30 @@ function calcularVertices(){
 
 function dibujarPlano(geo){
   const svg = document.getElementById('canvas');
+  const W = 760, H = 430;
+  const margin = 78;
 
-  // Bounding box real
+  // Bounding box en coordenadas reales (incluye PM)
   const pts = [geo.PM, geo.V1, geo.V2, geo.V3, geo.V4];
   const minE = Math.min(...pts.map(p=>p.e));
   const maxE = Math.max(...pts.map(p=>p.e));
   const minN = Math.min(...pts.map(p=>p.n));
   const maxN = Math.max(...pts.map(p=>p.n));
 
-  const W = 800, H = 600;
-  const margin = 90;
-
-  // dimensiones reales
   const spanE = (maxE - minE) || 1;
   const spanN = (maxN - minN) || 1;
 
-  // 🔥 padding para considerar cotas/flechas
-  const pad = 120;
+  const availW = W - margin*2;
+  const availH = H - margin*2;
 
-  const scale = Math.min(
-    (W - margin*2) / (spanE + pad),
-    (H - margin*2) / (spanN + pad)
-  );
+  const scale = Math.min(availW/spanE, availH/spanN);
 
-  // centro real
-  const centerE = (minE + maxE) / 2;
-  const centerN = (minN + maxN) / 2;
-
-  // centro visual perfecto
-  const cx = W / 2;
-  const cy = H / 2;
-
+  // proyectar: este -> x (derecha), norte -> y invertido (arriba)
   function proj(p){
-    return {
-      x: cx + (p.e - centerE) * scale,
-      y: cy - (p.n - centerN) * scale
-    };
+    const x = margin + (p.e - minE) * scale + (availW - spanE*scale)/2;
+    const y = margin + (maxN - p.n) * scale + (availH - spanN*scale)/2;
+    return {x, y};
   }
-
-  const pPM = proj(geo.PM);
-  const pV1 = proj(geo.V1);
-  const pV2 = proj(geo.V2);
-  const pV3 = proj(geo.V3);
-  const pV4 = proj(geo.V4);
-
-  const ink = "#1c2b22";
-  const accent = "#9c5b2c";
-
-  function line(p1,p2,opts={}){
-    const {dash="", w=1.1, color=ink, arrow=false, id=""} = opts;
-    const markerAttr = arrow ? `marker-end="url(#arrowhead)"` : "";
-    return `<line ${id?('id="'+id+'"'):''} x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${color}" stroke-width="${w}" ${dash?('stroke-dasharray="'+dash+'"'):''} ${markerAttr}/>`;
-  }
-
-  function label(x,y,text,opts={}){
-    const {size=10, anchor="middle", weight="400", rotate=0, color=ink} = opts;
-    const transform = rotate ? `transform="rotate(${rotate} ${x} ${y})"` : "";
-    return `<text x="${x}" y="${y}" font-size="${size}" text-anchor="${anchor}" font-weight="${weight}" fill="${color}" ${transform}>${text}</text>`;
-  }
-
-  function pointDot(p, r=3.2, color=ink){
-    return `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${color}"/>`;
-  }
-
-  let svgContent = `
-    <defs>
-      <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-        <path d="M0,0 L6,3 L0,6 Z" fill="${ink}"/>
-      </marker>
-    </defs>
-  `;
-
-  svgContent += `<polygon points="${pV1.x},${pV1.y} ${pV2.x},${pV2.y} ${pV3.x},${pV3.y} ${pV4.x},${pV4.y}"
-                   fill="rgba(156,91,44,0.06)" stroke="${ink}" stroke-width="1.6"/>`;
-
-  svgContent += line(pPM, pV1, {dash:"4,3", w:1, color:accent});
-
-  svgContent += pointDot(pPM, 3.4, accent);
-  svgContent += pointDot(pV1);
-  svgContent += pointDot(pV2);
-  svgContent += pointDot(pV3);
-  svgContent += pointDot(pV4);
-
-  svg.innerHTML = svgContent;
-
-  // escala
-  const scaleSvg = document.getElementById('scale-svg');
-  const barUnits = geo.ancho >= 2000 ? 1000 : 500;
-  const segPx = barUnits * scale;
-
-  let sx = 10, sy = 18;
-
-  let scaleContent = `<line x1="${sx}" y1="${sy}" x2="${sx+segPx*2}" y2="${sy}" stroke="${ink}" stroke-width="1.2"/>`;
-
-  for(let i=0;i<=2;i++){
-    const x = sx + i*segPx;
-    scaleContent += `<line x1="${x}" y1="${sy-5}" x2="${x}" y2="${sy+5}" stroke="${ink}" stroke-width="1.2"/>`;
-    scaleContent += `<text x="${x}" y="${sy+16}" font-size="8">${i*barUnits}</text>`;
-  }
-
-  scaleSvg.setAttribute('width', (sx+segPx*2+60));
-  scaleSvg.setAttribute('viewBox', `0 0 ${sx+segPx*2+60} 34`);
-  scaleSvg.innerHTML = scaleContent;
-}
 
   const pPM = proj(geo.PM);
   const pV1 = proj(geo.V1);
@@ -1335,12 +1237,26 @@ async function exportarPDF(){
   const imgData = canvas.toDataURL('image/jpeg', 0.75); 
   const { jsPDF } = window.jspdf;
 
-  // Oficio Chileno en orientación vertical, ajustando la imagen a lo ancho
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: [8.5,13] });
+  // Carta (Letter) en orientación vertical, ajustando la imagen a lo ancho
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  let renderWidth = imgWidth;
+  let renderHeight = imgHeight;
+  if(imgHeight > pageHeight){
+    renderHeight = pageHeight;
+    renderWidth = (canvas.width * renderHeight) / canvas.height;
+  }
+  const offsetX = (pageWidth - renderWidth) / 2;
+  const offsetY = (pageHeight - renderHeight) / 2;
+
+
+
+  pdf.addImage(imgData, 'JPEG', offsetX, offsetY, renderWidth, renderHeight);
     
 // ✅ capturar PDF
     const blob = pdf.output("blob");
