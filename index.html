@@ -974,11 +974,33 @@ function dibujarPlano(geo){
   const scale = Math.min(availW/spanE, availH/spanN);
 
   // proyectar: este -> x (derecha), norte -> y invertido (arriba)
-  function proj(p){
-    const x = margin + (p.e - minE) * scale + (availW - spanE*scale)/2;
-    const y = margin + (maxN - p.n) * scale + (availH - spanN*scale)/2;
-    return {x, y};
-  }
+const W = 800, H = 600;
+const margin = 90;
+
+// dimensión real
+const spanE = (maxE - minE) || 1;
+const spanN = (maxN - minN) || 1;
+
+// escala correcta
+const scale = Math.min(
+  (W - margin*2) / spanE,
+  (H - margin*2) / spanN
+);
+
+// 🔥 centro geométrico real
+const centerE = (minE + maxE) / 2;
+const centerN = (minN + maxN) / 2;
+
+// 🔥 centro visual del canvas
+const cx = W / 2;
+const cy = H * 0.45;   // ← leve ajuste profesional
+
+function proj(p){
+  return {
+    x: cx + (p.e - centerE) * scale,
+    y: cy + (centerN - p.n) * scale
+  };
+}
 
   const pPM = proj(geo.PM);
   const pV1 = proj(geo.V1);
