@@ -140,6 +140,21 @@ legend{
   border-color:var(--accent);
   background:#fff;
 }
+/* Date picker styling */
+.field input[type="date"]{
+  cursor:pointer;
+}
+.field input[type="date"]::-webkit-calendar-picker-indicator{
+  opacity:0.6;
+  cursor:pointer;
+  filter: invert(30%) sepia(60%) saturate(400%) hue-rotate(10deg);
+}
+.date-display{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:3px;
+  font-style:italic;
+}
 .row2{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -454,6 +469,50 @@ td.signature-cell .sig-role{
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+.igm-status{
+  font-size:10.5px;
+  margin-top:4px;
+  padding:4px 8px;
+  border-radius:3px;
+  display:none;
+}
+.igm-status.ok{
+  background:#eaf4ea;
+  color:#2a6b2a;
+  border:1px solid #b2ddb2;
+  display:block;
+}
+.igm-status.error{
+  background:#fdf0f0;
+  color:#8b2020;
+  border:1px solid #f0b0b0;
+  display:block;
+}
+.igm-status.loading{
+  background:#f5f3ec;
+  color:var(--muted);
+  border:1px solid var(--panel-border);
+  display:block;
+}
+.btn-igm{
+  background:#f0ebe0;
+  color:var(--ink);
+  border:1px solid var(--panel-border);
+  font-size:11px;
+  padding:6px 10px;
+  border-radius:3px;
+  cursor:pointer;
+  margin-top:6px;
+  width:100%;
+  text-align:left;
+  font-weight:600;
+  letter-spacing:.3px;
+  text-transform:uppercase;
+}
+.btn-igm:hover{ background:#e8e0d0; }
+</style>
 </head>
 
 <body>
@@ -537,11 +596,13 @@ td.signature-cell .sig-role{
       <div class="row2">
         <div class="field">
           <label for="fechapedimento">Fecha pedimento</label>
-          <input id="fechapedimento" value="26 de agosto de 2011">
+          <input type="date" id="fechapedimento" value="2011-08-26" onchange="actualizarFechaDisplay('fechapedimento','disp-pedimento')">
+          <div class="date-display" id="disp-pedimento">26 de agosto de 2011</div>
         </div>
         <div class="field">
           <label for="fecharesolucion">Fecha resolución</label>
-          <input id="fecharesolucion" value="30 de agosto de 2011">
+          <input type="date" id="fecharesolucion" value="2011-08-30" onchange="actualizarFechaDisplay('fecharesolucion','disp-resolucion')">
+          <div class="date-display" id="disp-resolucion">30 de agosto de 2011</div>
         </div>
       </div>
       <div class="row2">
@@ -551,16 +612,64 @@ td.signature-cell .sig-role{
         </div>
         <div class="field">
           <label for="juzgado">Juzgado</label>
-          <input id="juzgado" value="Primer Juzgado de Letras de Copiapó">
+          <select id="juzgado">
+            <option>JUZGADO DE LETRAS</option>
+            <option selected>PRIMER JUZGADO DE LETRAS</option>
+            <option>SEGUNDO JUZGADO DE LETRAS</option>
+            <option>TERCER JUZGADO DE LETRAS</option>
+            <option>CUARTO JUZGADO DE LETRAS</option>
+            <option>QUINTO JUZGADO DE LETRAS</option>
+            <option>SEXTO JUZGADO DE LETRAS</option>
+          </select>
         </div>
       </div>
       <div class="field">
+        <label for="ciudadjuzgado">Ciudad Juzgado</label>
+        <select id="ciudadjuzgado">
+          <option>ANTOFAGASTA</option>
+          <option>CALAMA</option>
+          <option>TOCOPILLA</option>
+          <option>TAL TAL</option>
+          <option>CHAÑARAL</option>
+          <option>DIEGO DE ALMAGRO</option>
+          <option selected>COPIAPÓ</option>
+          <option>CALDERA</option>
+          <option>VALLENAR</option>
+          <option>FREIRINA</option>
+          <option>LA SERENA</option>
+          <option>COQUIMBO</option>
+          <option>OVALLE</option>
+          <option>ILLAPEL</option>
+          <option>LOS VILOS</option>
+          <option>PETORCA</option>
+          <option>COMBARBALÁ</option>
+        </select>
+      </div>
+      <div class="field">
         <label for="fechainscripcion">Fecha inscripción</label>
-        <input id="fechainscripcion" value="05 de septiembre de 2011">
+        <input type="date" id="fechainscripcion" value="2011-09-05" onchange="actualizarFechaDisplay('fechainscripcion','disp-inscripcion')">
+        <div class="date-display" id="disp-inscripcion">5 de septiembre de 2011</div>
       </div>
       <div class="field">
         <label for="registroconservador">Registro / Conservador</label>
-        <input id="registroconservador" value="Registro de Descubrimientos del Conservador de Minas de Copiapó">
+        <select id="registroconservador">
+          <option>CONSERVADOR DE MINAS DE CALAMA</option>
+          <option>CONSERVADOR DE MINAS DE ANTOFAGASTA</option>
+          <option>CONSERVADOR DE MINAS DE TOCOPILLA</option>
+          <option>CONSERVADOR DE MINAS DE TALTAL</option>
+          <option>CONSERVADOR DE MINAS DE DIEGO DE ALMAGRO</option>
+          <option>CONSERVADOR DE MINAS DE CHAÑARAL</option>
+          <option selected>CONSERVADOR DE MINAS DE COPIAPÓ</option>
+          <option>CONSERVADOR DE MINAS DE CALDERA</option>
+          <option>CONSERVADOR DE MINAS DE VALLENAR</option>
+          <option>CONSERVADOR DE MINAS DE LA SERENA</option>
+          <option>CONSERVADOR DE MINAS DE MONTE PATRIA</option>
+          <option>CONSERVADOR DE MINAS DE OVALLE</option>
+          <option>CONSERVADOR DE MINAS DE ILLAPEL</option>
+          <option>CONSERVADOR DE MINAS DE LOS VILOS</option>
+          <option>CONSERVADOR DE MINAS DE COMBARABALÁ</option>
+          <option>CONSERVADOR DE MINAS DE PETORCA</option>
+        </select>
       </div>
       <div class="field">
         <label for="mensurador">Perito mensurador</label>
@@ -580,6 +689,8 @@ td.signature-cell .sig-role{
           <input id="norte" value="6987800">
         </div>
       </div>
+      <button class="btn-igm" onclick="buscarCartaIGM()">🗺 Buscar Hoja I.G.M. automáticamente</button>
+      <div class="igm-status" id="igm-status"></div>
       <div class="row2">
         <div class="field">
           <label for="ancho">Ancho (m)</label>
@@ -971,23 +1082,45 @@ function dibujarPlano(geo){
    RENDER DE TEXTOS / FICHA / TABLA
    ========================================================= */
 
+function fechaEspanol(isoStr){
+  if(!isoStr) return "";
+  const [y,m,d] = isoStr.split('-').map(Number);
+  const meses = ["enero","febrero","marzo","abril","mayo","junio",
+                 "julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  return `${d} de ${meses[m-1]} de ${y}`;
+}
+
+function actualizarFechaDisplay(inputId, displayId){
+  const val = document.getElementById(inputId).value;
+  const el = document.getElementById(displayId);
+  if(el) el.textContent = val ? fechaEspanol(val) : "";
+}
+
 function v(id){
   const el = document.getElementById(id);
   return el ? el.value.trim() : "";
 }
 
 function actualizarFicha(){
+  // Fechas: leer del input type=date y convertir a español
+  const fpedimento = fechaEspanol(v('fechapedimento'));
+  const fresolucion = fechaEspanol(v('fecharesolucion'));
+  const finscripcion = fechaEspanol(v('fechainscripcion'));
+
+  // Juzgado: componer desde los dos selects
+  const juzgadoTexto = v('juzgado') + " DE " + v('ciudadjuzgado');
+
   document.getElementById('ph-nombre').textContent = v('nombre') || "—";
   document.getElementById('ph-region').textContent = v('region') || "—";
   document.getElementById('ph-provincia').textContent = v('provincia') || "—";
   document.getElementById('ph-comuna').textContent = v('comuna') || "—";
   document.getElementById('ph-lugar').textContent = v('lugar') || "—";
   document.getElementById('ph-concesionario').textContent = v('concesionario') || "—";
-  document.getElementById('ph-fpedimento').textContent = v('fechapedimento') || "—";
-  document.getElementById('ph-fresolucion').textContent = v('fecharesolucion') || "—";
+  document.getElementById('ph-fpedimento').textContent = fpedimento || "—";
+  document.getElementById('ph-fresolucion').textContent = fresolucion || "—";
   document.getElementById('ph-rol').textContent = v('autosrol') || "—";
-  document.getElementById('ph-juzgado').textContent = v('juzgado') || "—";
-  document.getElementById('ph-finscripcion').textContent = v('fechainscripcion') || "—";
+  document.getElementById('ph-juzgado').textContent = juzgadoTexto || "—";
+  document.getElementById('ph-finscripcion').textContent = finscripcion || "—";
   document.getElementById('ph-mensurador2').textContent = v('mensurador') || "—";
   document.getElementById('ph-fojas').textContent = v('fojas') || "—";
   document.getElementById('ph-numero').textContent = v('numero') || "—";
@@ -1173,6 +1306,102 @@ async function exportarPDF(){
     sheet.style.transform = prevTransform;
     btns.forEach(b => b.disabled = false);
     if(exportBtn) exportBtn.textContent = originalLabel;
+  }
+}
+
+/* =========================================================
+   BÚSQUEDA AUTOMÁTICA HOJA I.G.M.
+   ========================================================= */
+
+let _igmData = null; // caché del GeoJSON
+
+async function cargarIGM(){
+  if(_igmData) return _igmData;
+  // Ruta relativa: el GeoJSON vive en IGM/cartas_igm.geojson junto al HTML
+  // Intenta primero ruta relativa (GitHub Pages / servidor local)
+  // Si falla, usa la URL raw de GitHub como fallback
+  let resp;
+  try {
+    resp = await fetch('igm/cartas_igm.geojson');
+    if(!resp.ok) throw new Error('relativa falló');
+  } catch(_){
+    resp = await fetch('https://raw.githubusercontent.com/propiedadsuperficial/solsen/main/igm/cartas_igm.geojson');
+  }
+  if(!resp.ok) throw new Error(`No se pudo cargar el GeoJSON IGM (HTTP ${resp.status})`);
+  if(!resp.ok) throw new Error(`No se pudo cargar el GeoJSON IGM (HTTP ${resp.status})`);
+  _igmData = await resp.json();
+  return _igmData;
+}
+
+// Ray-casting point-in-polygon (2D, coordenadas planas UTM)
+function puntoDentroDePoligono(px, py, ring){
+  let inside = false;
+  for(let i=0, j=ring.length-1; i<ring.length; j=i++){
+    const xi=ring[i][0], yi=ring[i][1];
+    const xj=ring[j][0], yj=ring[j][1];
+    if(((yi>py)!==(yj>py)) && (px < (xj-xi)*(py-yi)/(yj-yi)+xi)){
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function buscarFeature(gj, este, norte){
+  for(const feat of gj.features){
+    const geom = feat.geometry;
+    // Soporta Polygon y MultiPolygon
+    const polys = geom.type === 'MultiPolygon'
+      ? geom.coordinates
+      : [geom.coordinates];
+    for(const poly of polys){
+      // poly[0] = anillo exterior
+      if(puntoDentroDePoligono(este, norte, poly[0])){
+        return feat;
+      }
+    }
+  }
+  return null;
+}
+
+async function buscarCartaIGM(){
+  const statusEl = document.getElementById('igm-status');
+  const este  = parseFloat(document.getElementById('este').value);
+  const norte = parseFloat(document.getElementById('norte').value);
+
+  if(isNaN(este) || isNaN(norte)){
+    statusEl.className = 'igm-status error';
+    statusEl.textContent = '⚠ Ingrese coordenadas Este y Norte válidas primero.';
+    return;
+  }
+
+  statusEl.className = 'igm-status loading';
+  statusEl.textContent = '⏳ Cargando cartas IGM…';
+
+  try{
+    const gj = await cargarIGM();
+    statusEl.textContent = '🔍 Buscando…';
+
+    const feat = buscarFeature(gj, este, norte);
+    if(!feat){
+      statusEl.className = 'igm-status error';
+      statusEl.textContent = '✗ No se encontró carta IGM para esas coordenadas. Verifique que el punto esté en Chile continental.';
+      return;
+    }
+
+    const nombre = feat.properties.nombre_car || "";
+    const codigo = feat.properties.codigo    || "";
+
+    // Rellenar campos del formulario
+    document.getElementById('hojaigm').value = nombre.toUpperCase();
+    document.getElementById('seccion').value = codigo;
+
+    statusEl.className = 'igm-status ok';
+    statusEl.textContent = `✔ Encontrada: ${nombre.toUpperCase()} — Sección ${codigo}`;
+
+  } catch(err){
+    statusEl.className = 'igm-status error';
+    statusEl.textContent = `✗ Error: ${err.message}`;
+    console.error(err);
   }
 }
 
