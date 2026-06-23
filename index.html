@@ -1261,21 +1261,7 @@ async function exportarPDF(){
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-  let renderWidth = imgWidth;
-  let renderHeight = imgHeight;
-  if(imgHeight > pageHeight){
-    renderHeight = pageHeight;
-    renderWidth = (canvas.width * renderHeight) / canvas.height;
-  }
-  const offsetX = (pageWidth - renderWidth) / 2;
-  const offsetY = (pageHeight - renderHeight) / 2;
-
-
-
-  pdf.addImage(imgData, 'JPEG', offsetX, offsetY, renderWidth, renderHeight);
+  pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
     
 // ✅ capturar PDF
     const blob = pdf.output("blob");
