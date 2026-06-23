@@ -363,6 +363,7 @@ table.coords td.num{
 .plano-box svg{ width:100%; height:100%; display:block; }
 
 .scale-bar{
+
   margin:0 14px;
   border:1.4px solid var(--ink);
   border-top:none;
@@ -370,7 +371,10 @@ table.coords td.num{
   display:flex;
   align-items:center;
   justify-content:center;
+
+  flex:0 0 auto; /* 🔥 agrega */
 }
+
 
 /* ----- Carátula final (idéntica al plano oficial) ----- */
 .caratula{
