@@ -956,53 +956,107 @@ function calcularVertices(){
 function dibujarPlano(geo){
   const svg = document.getElementById('canvas');
 
-
-  // Bounding box en coordenadas reales (incluye PM)
+  // Bounding box real
   const pts = [geo.PM, geo.V1, geo.V2, geo.V3, geo.V4];
   const minE = Math.min(...pts.map(p=>p.e));
   const maxE = Math.max(...pts.map(p=>p.e));
   const minN = Math.min(...pts.map(p=>p.n));
   const maxN = Math.max(...pts.map(p=>p.n));
 
+  const W = 800, H = 600;
+  const margin = 90;
+
+  // dimensiones reales
   const spanE = (maxE - minE) || 1;
   const spanN = (maxN - minN) || 1;
 
-  const W = 800, H = 600;
-  const margin = 90;
-  
-  const spanE = (maxE - minE) || 1;
-  const spanN = (maxN - minN) || 1;
-  
+  // 🔥 padding para considerar cotas/flechas
   const pad = 120;
-  
+
   const scale = Math.min(
     (W - margin*2) / (spanE + pad),
     (H - margin*2) / (spanN + pad)
   );
-  
+
+  // centro real
   const centerE = (minE + maxE) / 2;
   const centerN = (minN + maxN) / 2;
-  
+
+  // centro visual perfecto
   const cx = W / 2;
   const cy = H / 2;
 
+  function proj(p){
+    return {
+      x: cx + (p.e - centerE) * scale,
+      y: cy - (p.n - centerN) * scale
+    };
+  }
 
-  // proyectar: este -> x (derecha), norte -> y invertido (arriba)
+  const pPM = proj(geo.PM);
+  const pV1 = proj(geo.V1);
+  const pV2 = proj(geo.V2);
+  const pV3 = proj(geo.V3);
+  const pV4 = proj(geo.V4);
 
+  const ink = "#1c2b22";
+  const accent = "#9c5b2c";
 
-// 🔥 centro geométrico real
-const centerE = (minE + maxE) / 2;
-const centerN = (minN + maxN) / 2;
+  function line(p1,p2,opts={}){
+    const {dash="", w=1.1, color=ink, arrow=false, id=""} = opts;
+    const markerAttr = arrow ? `marker-end="url(#arrowhead)"` : "";
+    return `<line ${id?('id="'+id+'"'):''} x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${color}" stroke-width="${w}" ${dash?('stroke-dasharray="'+dash+'"'):''} ${markerAttr}/>`;
+  }
 
-// 🔥 centro visual del canvas
-const cx = W / 2;
-const cy = H * 0.45;   // ← leve ajuste profesional
+  function label(x,y,text,opts={}){
+    const {size=10, anchor="middle", weight="400", rotate=0, color=ink} = opts;
+    const transform = rotate ? `transform="rotate(${rotate} ${x} ${y})"` : "";
+    return `<text x="${x}" y="${y}" font-size="${size}" text-anchor="${anchor}" font-weight="${weight}" fill="${color}" ${transform}>${text}</text>`;
+  }
 
-function proj(p){
-  return {
-    x: cx + (p.e - centerE) * scale,
-    y: cy + (centerN - p.n) * scale
-  };
+  function pointDot(p, r=3.2, color=ink){
+    return `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${color}"/>`;
+  }
+
+  let svgContent = `
+    <defs>
+      <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="${ink}"/>
+      </marker>
+    </defs>
+  `;
+
+  svgContent += `<polygon points="${pV1.x},${pV1.y} ${pV2.x},${pV2.y} ${pV3.x},${pV3.y} ${pV4.x},${pV4.y}"
+                   fill="rgba(156,91,44,0.06)" stroke="${ink}" stroke-width="1.6"/>`;
+
+  svgContent += line(pPM, pV1, {dash:"4,3", w:1, color:accent});
+
+  svgContent += pointDot(pPM, 3.4, accent);
+  svgContent += pointDot(pV1);
+  svgContent += pointDot(pV2);
+  svgContent += pointDot(pV3);
+  svgContent += pointDot(pV4);
+
+  svg.innerHTML = svgContent;
+
+  // escala
+  const scaleSvg = document.getElementById('scale-svg');
+  const barUnits = geo.ancho >= 2000 ? 1000 : 500;
+  const segPx = barUnits * scale;
+
+  let sx = 10, sy = 18;
+
+  let scaleContent = `<line x1="${sx}" y1="${sy}" x2="${sx+segPx*2}" y2="${sy}" stroke="${ink}" stroke-width="1.2"/>`;
+
+  for(let i=0;i<=2;i++){
+    const x = sx + i*segPx;
+    scaleContent += `<line x1="${x}" y1="${sy-5}" x2="${x}" y2="${sy+5}" stroke="${ink}" stroke-width="1.2"/>`;
+    scaleContent += `<text x="${x}" y="${sy+16}" font-size="8">${i*barUnits}</text>`;
+  }
+
+  scaleSvg.setAttribute('width', (sx+segPx*2+60));
+  scaleSvg.setAttribute('viewBox', `0 0 ${sx+segPx*2+60} 34`);
+  scaleSvg.innerHTML = scaleContent;
 }
 
   const pPM = proj(geo.PM);
