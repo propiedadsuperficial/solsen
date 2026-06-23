@@ -284,10 +284,14 @@ button:active{ transform:translateY(1px); }
 
 /* ----- Tabla de coordenadas ----- */
 .coord-azimut-wrap{
+
   display:flex;
   margin:14px 14px 0;
   border:1.4px solid var(--ink);
+
+  flex:0 0 auto; /* 🔥 agrega esto */
 }
+
 table.coords{
   border-collapse:collapse;
   font-size:10.5px;
@@ -342,15 +346,20 @@ table.coords td.num{
 
 /* ----- Plano gráfico ----- */
 .plano-box{
+
   margin:0 14px;
   border:1.4px solid var(--ink);
   border-top:none;
   position:relative;
-  height:430px;
+
+  flex:1;            /* 🔥 clave */
+  min-height:600px;  /* 🔥 base mínima */
+
   background:
     linear-gradient(0deg, transparent 24px, rgba(0,0,0,0.025) 25px),
     #fff;
 }
+
 .plano-box svg{ width:100%; height:100%; display:block; }
 
 .scale-bar{
