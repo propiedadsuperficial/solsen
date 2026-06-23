@@ -1123,7 +1123,7 @@ async function exportarPDF(){
 
 
 
-  pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderWidth, renderHeight);
+  pdf.addImage(imgData, 'JPEG', offsetX, offsetY, renderWidth, renderHeight);
     
 // ✅ capturar PDF
     const blob = pdf.output("blob");
