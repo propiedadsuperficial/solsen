@@ -955,8 +955,7 @@ function calcularVertices(){
 
 function dibujarPlano(geo){
   const svg = document.getElementById('canvas');
-  const W = 760, H = 430;
-  const margin = 78;
+
 
   // Bounding box en coordenadas reales (incluye PM)
   const pts = [geo.PM, geo.V1, geo.V2, geo.V3, geo.V4];
@@ -968,24 +967,28 @@ function dibujarPlano(geo){
   const spanE = (maxE - minE) || 1;
   const spanN = (maxN - minN) || 1;
 
-  const availW = W - margin*2;
-  const availH = H - margin*2;
+  const W = 800, H = 600;
+  const margin = 90;
+  
+  const spanE = (maxE - minE) || 1;
+  const spanN = (maxN - minN) || 1;
+  
+  const pad = 120;
+  
+  const scale = Math.min(
+    (W - margin*2) / (spanE + pad),
+    (H - margin*2) / (spanN + pad)
+  );
+  
+  const centerE = (minE + maxE) / 2;
+  const centerN = (minN + maxN) / 2;
+  
+  const cx = W / 2;
+  const cy = H / 2;
 
-  const scale = Math.min(availW/spanE, availH/spanN);
 
   // proyectar: este -> x (derecha), norte -> y invertido (arriba)
-const W = 800, H = 600;
-const margin = 90;
 
-// dimensión real
-const spanE = (maxE - minE) || 1;
-const spanN = (maxN - minN) || 1;
-
-// escala correcta
-const scale = Math.min(
-  (W - margin*2) / spanE,
-  (H - margin*2) / spanN
-);
 
 // 🔥 centro geométrico real
 const centerE = (minE + maxE) / 2;
