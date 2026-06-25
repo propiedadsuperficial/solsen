@@ -235,7 +235,7 @@ button:active{ transform:translateY(1px); }
 /* ---------- Stage / Sheet ---------- */
 .stage-toolbar{
   width:100%;
-  max-width:900px;
+  max-width:870px;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -272,12 +272,16 @@ button:active{ transform:translateY(1px); }
 }
 
 #sheet{
-  width:780px;
+  /* 8.5 × 13 in a 96 dpi = 816 × 1248 px */
+  width:816px;
+  min-height:1248px;
   background:#ffffff;
   box-shadow:0 6px 22px rgba(0,0,0,.18);
   font-family:var(--sans);
   color:var(--ink);
   transform-origin:top center;
+  display:flex;
+  flex-direction:column;
 }
 
 /* ----- Tabla de coordenadas ----- */
@@ -344,7 +348,7 @@ table.coords td.num{
   border:1.4px solid var(--ink);
   border-top:none;
   position:relative;
-  height:430px;
+  height:630px;
   background:
     linear-gradient(0deg, transparent 24px, rgba(0,0,0,0.025) 25px),
     #fff;
@@ -455,13 +459,15 @@ td.signature-cell .sig-role{
 
 /* ---------- Print ---------- */
 @media print{
+  @page{ size: 8.5in 13in; margin: 0; }
   body *{ visibility:hidden; }
   #sheet, #sheet *{ visibility:visible; }
   #sheet{
     position:absolute;
     left:0; top:0;
     box-shadow:none;
-    width:100%;
+    width:8.5in;
+    min-height:13in;
   }
   #sheet-wrapper{ padding:0; background:#fff; box-shadow:none; }
 }
@@ -512,6 +518,25 @@ td.signature-cell .sig-role{
   text-transform:uppercase;
 }
 .btn-igm:hover{ background:#e8e0d0; }
+
+.editable-hint{
+  font-size:9px;
+  color:var(--accent);
+  font-style:italic;
+  letter-spacing:.3px;
+  text-transform:none;
+  margin-left:4px;
+  opacity:.8;
+}
+
+@keyframes autofill-flash{
+  0%   { background:#fff9e6; border-color:#c8982a; }
+  70%  { background:#fff9e6; border-color:#c8982a; }
+  100% { background:#fdfcfa; border-color:var(--panel-border); }
+}
+.autofilled{
+  animation: autofill-flash 1.8s ease forwards;
+}
 </style>
 </head>
 
@@ -577,12 +602,12 @@ td.signature-cell .sig-role{
       </div>
       <div class="row2">
         <div class="field">
-          <label for="hojaigm">Hoja I.G.M.</label>
-          <input id="hojaigm" value="Llano de Campos">
+          <label for="hojaigm">Hoja I.G.M. <span class="editable-hint">✎ editable</span></label>
+          <input id="hojaigm" value="Llano de Campos" placeholder="Ej: Llano de Campos">
         </div>
         <div class="field">
-          <label for="seccion">Sección</label>
-          <input id="seccion" value="C-18">
+          <label for="seccion">Sección <span class="editable-hint">✎ editable</span></label>
+          <input id="seccion" value="C-18" placeholder="Ej: C-082">
         </div>
       </div>
     </fieldset>
@@ -1237,10 +1262,10 @@ async function exportarPDF(){
   const imgData = canvas.toDataURL('image/jpeg', 0.75); 
   const { jsPDF } = window.jspdf;
 
-  // Carta (Letter) en orientación vertical, ajustando la imagen a lo ancho
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
+  // Formato personalizado 8.5 × 13 pulgadas (en puntos: 1 in = 72 pt)
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: [8.5*72, 13*72] });
+  const pageWidth  = pdf.internal.pageSize.getWidth();   // 612 pt
+  const pageHeight = pdf.internal.pageSize.getHeight();  // 936 pt
 
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -1392,8 +1417,18 @@ async function buscarCartaIGM(){
     const codigo = feat.properties.codigo    || "";
 
     // Rellenar campos del formulario
-    document.getElementById('hojaigm').value = nombre.toUpperCase();
-    document.getElementById('seccion').value = codigo;
+    const hojaEl = document.getElementById('hojaigm');
+    const secEl  = document.getElementById('seccion');
+
+    hojaEl.value = nombre.toUpperCase();
+    secEl.value  = codigo;
+
+    // Flash visual para indicar que el campo fue llenado automáticamente pero es editable
+    [hojaEl, secEl].forEach(el => {
+      el.classList.remove('autofilled');
+      void el.offsetWidth; // fuerza reflow para reiniciar la animación
+      el.classList.add('autofilled');
+    });
 
     statusEl.className = 'igm-status ok';
     statusEl.textContent = `✔ Encontrada: ${nombre.toUpperCase()} — Sección ${codigo}`;
