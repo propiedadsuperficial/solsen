@@ -407,11 +407,12 @@ table.coords td.num{
 td.ub-col{
   width:145px;
   text-align:center;
+  vertical-align:top;
 }
 td.ub-col .ub-label{ text-align:left; font-size:10.5px; text-transform:uppercase; }
 td.ub-col .ub-value{ text-align:center; margin:0 0 10px; text-transform:uppercase; }
 td.ub-col .ub-lugar{ margin-top:6px; }
-.north-rose{ margin-top:14px; }
+.north-rose{ margin-top:6px; }
 
 /* Columna concesionario (encabezado propio) */
 td.conc-col{
@@ -596,10 +597,6 @@ td.signature-cell .sig-role{
           <input id="comuna" value="Copiapó">
         </div>
       </div>
-      <div class="field">
-        <label for="lugar">Lugar</label>
-        <input id="lugar" value="Quebrada de la laguna sin nombre">
-      </div>
       <div class="row2">
         <div class="field">
           <label for="hojaigm">Hoja I.G.M. <span class="editable-hint">✎ editable</span></label>
@@ -707,11 +704,11 @@ td.signature-cell .sig-role{
       <div class="row2">
         <div class="field">
           <label for="este">Este P.M. (m)</label>
-          <input id="este" value="399000">
+          <input id="este" value="399000" onblur="normalizarCoordenada(this)" onpaste="setTimeout(()=>normalizarCoordenada(this),0)">
         </div>
         <div class="field">
           <label for="norte">Norte P.M. (m)</label>
-          <input id="norte" value="6987800">
+          <input id="norte" value="6987800" onblur="normalizarCoordenada(this)" onpaste="setTimeout(()=>normalizarCoordenada(this),0)">
         </div>
       </div>
       <button class="btn-igm" onclick="buscarCartaIGM()">🗺 Buscar Hoja I.G.M. automáticamente</button>
@@ -787,7 +784,7 @@ td.signature-cell .sig-role{
 
         <!-- Plano gráfico SVG -->
         <div class="plano-box" id="plano-box">
-          <svg id="canvas" viewBox="0 0 760 430" preserveAspectRatio="xMidYMid meet"></svg>
+          <svg id="canvas" viewBox="0 0 760 630" preserveAspectRatio="xMidYMid meet"></svg>
         </div>
 
         <!-- Escala -->
@@ -813,12 +810,11 @@ td.signature-cell .sig-role{
                 <div class="ub-value" id="ph-provincia">—</div>
                 <div class="ub-label">Comuna:</div>
                 <div class="ub-value" id="ph-comuna">—</div>
-                <div class="ub-value ub-lugar" id="ph-lugar">—</div>
-                <svg class="north-rose" width="46" height="46" viewBox="0 0 46 46">
+                <svg class="north-rose" width="56" height="56" viewBox="-2 -2 52 52">
                   <circle cx="23" cy="23" r="20" fill="none" stroke="#1c2b22" stroke-width="1.2"/>
                   <polygon points="23,5 27,23 23,19 19,23" fill="#1c2b22"/>
-                  <text x="23" y="14" font-size="7" text-anchor="middle" font-weight="700">N</text>
-                  <text x="23" y="40" font-size="6" text-anchor="middle">U.T.M.</text>
+                  <text x="23" y="12" font-size="7" text-anchor="middle" font-weight="700">N</text>
+                  <text x="23" y="41" font-size="6" text-anchor="middle">U.T.M.</text>
                 </svg>
               </td>
               <td class="conc-col" colspan="2">
@@ -916,12 +912,117 @@ function formatGon(v){
 }
 
 /* =========================================================
+   PARSEO INTELIGENTE DE COORDENADAS
+   Detecta automáticamente el formato del separador de miles
+   y decimales, ya sea "." y "," o "," y "."
+   Ejemplos válidos:
+     399.000,50  → 399000.50  (formato europeo/chileno)
+     399,000.50  → 399000.50  (formato anglosajón)
+     399000,50   → 399000.50  (sin sep. de miles, decimal coma)
+     399000.50   → 399000.50  (estándar)
+     6.987.800   → 6987800    (miles con punto, sin decimal)
+   ========================================================= */
+
+function parsearCoordenada(raw){
+  const s = raw.trim().replace(/\s/g, '');
+  if(s === '') return NaN;
+
+  // Contar puntos y comas
+  const nPuntos = (s.match(/\./g) || []).length;
+  const nComas  = (s.match(/,/g)  || []).length;
+
+  let normalizado;
+
+  if(nPuntos === 0 && nComas === 0){
+    // "399000" — sin separadores
+    normalizado = s;
+
+  } else if(nPuntos > 0 && nComas === 0){
+    // Solo puntos: pueden ser sep. de miles ("6.987.800") o decimal ("399000.50")
+    if(nPuntos > 1){
+      // Múltiples puntos → todos son sep. de miles → quitar
+      normalizado = s.replace(/\./g, '');
+    } else {
+      // Un solo punto: es decimal si la parte tras el punto tiene ≤2 dígitos
+      // Y la parte entera tiene >4 dígitos (indicador de que es un número grande)
+      const partes = s.split('.');
+      const fracDigits = partes[1].length;
+      if(fracDigits <= 3 && partes[0].length >= 4){
+        // Podría ser sep. de miles: "399.000" → 399000
+        // Pero solo si la parte decimal es exactamente 3 dígitos
+        if(fracDigits === 3){
+          normalizado = s.replace(/\./g, '');
+        } else {
+          normalizado = s; // es decimal real
+        }
+      } else {
+        normalizado = s; // es decimal real
+      }
+    }
+
+  } else if(nComas > 0 && nPuntos === 0){
+    // Solo comas
+    if(nComas > 1){
+      // Múltiples comas → sep. de miles → quitar
+      normalizado = s.replace(/,/g, '');
+    } else {
+      // Una sola coma: sep. de miles si fracción tiene 3 dígitos, si no es decimal
+      const partes = s.split(',');
+      if(partes[1].length === 3 && partes[0].length >= 1){
+        // Ambiguo: tratamos como miles si el resultado tiene sentido (>100000 Este o >1000000 Norte)
+        const comoMiles  = parseFloat(partes.join(''));
+        const comoDecimal = parseFloat(partes[0] + '.' + partes[1]);
+        // Heurística: Este ~100.000–900.000 / Norte ~6.000.000–8.000.000
+        if(comoMiles >= 100000){
+          normalizado = partes.join('');
+        } else {
+          normalizado = partes[0] + '.' + partes[1];
+        }
+      } else {
+        // Decimal con coma: "399000,50" → "399000.50"
+        normalizado = s.replace(',', '.');
+      }
+    }
+
+  } else {
+    // Hay tanto puntos como comas
+    // Identificar cuál es sep. de miles y cuál es decimal
+    const iPunto = s.lastIndexOf('.');
+    const iComa  = s.lastIndexOf(',');
+
+    if(iComa > iPunto){
+      // La coma aparece después → es el decimal  "399.000,50"
+      normalizado = s.replace(/\./g, '').replace(',', '.');
+    } else {
+      // El punto aparece después → es el decimal  "399,000.50"
+      normalizado = s.replace(/,/g, '');
+    }
+  }
+
+  const resultado = parseFloat(normalizado);
+  return resultado;
+}
+
+function normalizarCoordenada(input){
+  const val = parsearCoordenada(input.value);
+  if(!isNaN(val)){
+    // Reescribir el campo con el valor numérico limpio
+    input.value = val % 1 === 0 ? String(val) : val.toFixed(2);
+    input.style.borderColor = '';
+    input.title = '';
+  } else if(input.value.trim() !== ''){
+    input.style.borderColor = '#c0392b';
+    input.title = 'Formato no reconocido';
+  }
+}
+
+/* =========================================================
    CÁLCULO PRINCIPAL
    ========================================================= */
 
 function calcularVertices(){
-  const este  = parseFloat(document.getElementById('este').value);
-  const norte = parseFloat(document.getElementById('norte').value);
+  const este  = parsearCoordenada(document.getElementById('este').value);
+  const norte = parsearCoordenada(document.getElementById('norte').value);
   const ancho = parseFloat(document.getElementById('ancho').value);
   const alto  = parseFloat(document.getElementById('alto').value);
 
@@ -961,7 +1062,7 @@ function calcularVertices(){
 
 function dibujarPlano(geo){
   const svg = document.getElementById('canvas');
-  const W = 760, H = 430;
+  const W = 760, H = 630;
   const margin = 78;
 
   // Bounding box en coordenadas reales (incluye PM)
@@ -1139,7 +1240,6 @@ function actualizarFicha(){
   document.getElementById('ph-region').textContent = v('region') || "—";
   document.getElementById('ph-provincia').textContent = v('provincia') || "—";
   document.getElementById('ph-comuna').textContent = v('comuna') || "—";
-  document.getElementById('ph-lugar').textContent = v('lugar') || "—";
   document.getElementById('ph-concesionario').textContent = v('concesionario') || "—";
   document.getElementById('ph-fpedimento').textContent = fpedimento || "—";
   document.getElementById('ph-fresolucion').textContent = fresolucion || "—";
@@ -1390,8 +1490,8 @@ function buscarFeature(gj, este, norte){
 
 async function buscarCartaIGM(){
   const statusEl = document.getElementById('igm-status');
-  const este  = parseFloat(document.getElementById('este').value);
-  const norte = parseFloat(document.getElementById('norte').value);
+  const este  = parsearCoordenada(document.getElementById('este').value);
+  const norte = parsearCoordenada(document.getElementById('norte').value);
 
   if(isNaN(este) || isNaN(norte)){
     statusEl.className = 'igm-status error';
